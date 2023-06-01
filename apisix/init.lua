@@ -122,6 +122,7 @@ function _M.http_init_worker()
         core.grpc = nil
     end
 
+    -- test
     local we = require("resty.worker.events")
     local ok, err = we.configure({shm = "worker-events", interval = 0.1})
     if not ok then
