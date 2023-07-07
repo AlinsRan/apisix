@@ -97,6 +97,7 @@ end
 
 local function response_err(err)
     core.log.error("failure in conf server: ", err)
+    core.log.error("failure in conf server: ", err)
 
     if ngx.get_phase() == "balancer" then
         return
