@@ -110,6 +110,7 @@ install_rust () {
 set_coredns() {
     # test a domain name is configured as upstream
     echo "127.0.0.1 test.com" | sudo tee -a /etc/hosts
+    echo "127.0.0.1 test2.com" | sudo tee -a /etc/hosts
     echo "::1 ipv6.local" | sudo tee -a /etc/hosts
     # test certificate verification
     echo "127.0.0.1 admin.apisix.dev" | sudo tee -a /etc/hosts
