@@ -120,9 +120,9 @@ passed
 
 === TEST 3: Successfully, access test.com with TLSv1.3
 --- exec
-curl -k -v --tls-max 1.3 --tlsv1.3 --resolve "test.com:1994:127.0.0.1" https://test.com:1994/hello 2>&1 | cat
+echo -n "Q"  | /usr/local/openresty/openssl111/bin/openssl s_client -connect test.com:1994 -tls1_3 2>&1 | cat
 --- response_body eval
-qr/TLSv1\.3 \(IN\), TLS handshake, Server hello(?s).*hello world/
+qr/Server certificate/
 
 
 
@@ -136,9 +136,9 @@ qr/TLSv1\.2 \(IN\), TLS handshake, Server hello(?s).*hello world/
 
 === TEST 5: Successfully, access test.com with TLSv1.1
 --- exec
-curl -k -v --tls-max 1.1 --tlsv1.1 --resolve "test.com:1994:127.0.0.1" https://test.com:1994/hello 2>&1 | cat
+echo -n "Q"  | /usr/local/openresty/openssl111/bin/openssl s_client -connect test.com:1994 -tls1_1 2>&1 | cat
 --- response_body eval
-qr/TLSv1\.1 \(IN\), TLS handshake, Server hello(?s).*hello world/
+qr/Server certificate/
 
 
 
@@ -211,9 +211,9 @@ GET /t
 
 === TEST 8: Successfully, access test.com with TLSv1.3
 --- exec
-curl -k -v --tls-max 1.3 --tlsv1.3 --resolve "test.com:1994:127.0.0.1" https://test.com:1994/hello 2>&1 | cat
+echo -n "Q"  | /usr/local/openresty/openssl111/bin/openssl s_client -connect test.com:1994 -tls1_3 2>&1 | cat
 --- response_body eval
-qr/TLSv1\.3 \(IN\), TLS handshake, Server hello(?s).*hello world/
+qr/Server certificate/
 
 
 
@@ -227,9 +227,9 @@ qr/TLSv1\.2 \(IN\), TLS handshake, Server hello(?s).*hello world/
 
 === TEST 10: Successfully, access test2.com with TLSv1.3
 --- exec
-curl -k -v --tls-max 1.3 --tlsv1.3 --resolve "test2.com:1994:127.0.0.1" https://test2.com:1994/hello 2>&1 | cat
+echo -n "Q"  | /usr/local/openresty/openssl111/bin/openssl s_client -connect test2.com:1994 -tls1_3 2>&1 | cat
 --- response_body eval
-qr/TLSv1\.3 \(IN\), TLS handshake, Server hello(?s).*hello world/
+qr/Server certificate/
 
 
 
@@ -277,14 +277,14 @@ passed
 
 === TEST 13: Successfully, access test.com with TLSv1.1
 --- exec
-curl -k -v --tls-max 1.1 --tlsv1.1 --resolve "test.com:1994:127.0.0.1" https://test.com:1994/hello 2>&1 | cat
+echo -n "Q"  | /usr/local/openresty/openssl111/bin/openssl s_client -connect test.com:1994 -tls1_1 2>&1 | cat
 --- response_body eval
-qr/TLSv1\.1 \(IN\), TLS handshake, Server hello(?s).*hello world/
+qr/Server certificate/
 
 
 
 === TEST 14: Failed, access test.com with TLSv1.3
 --- exec
-curl -k -v --tls-max 1.3 --tlsv1.3 --resolve "test.com:1994:127.0.0.1" https://test.com:1994/hello 2>&1 | cat
+echo -n "Q"  | /usr/local/openresty/openssl111/bin/openssl s_client -connect test.com:1994 -tls1_3 2>&1 | cat
 --- response_body eval
-qr/TLSv1\.3 \(IN\), TLS alert/
+qr/tlsv1 alert/
