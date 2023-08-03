@@ -38,7 +38,7 @@ OPENSSL3_PREFIX=${OPENSSL3_PREFIX-/home/runner}
 SSL_LIB_VERSION=${SSL_LIB_VERSION-openssl}
 
 if [ "$OPENRESTY_VERSION" == "source" ]; then
-    export openssl_prefix=/usr/local/openssl111
+    export openssl_prefix=/usr/local/openresty/openssl111
     export zlib_prefix=/usr/local/openresty/zlib
     export pcre_prefix=/usr/local/openresty/pcre
 
