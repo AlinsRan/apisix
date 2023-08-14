@@ -29,7 +29,8 @@ jobs:
         os_name:
           - linux_openresty
         test_dir:
-          - t/node/upstream-websocket.t
+          - t/plugin/ext-plugin/sanity.t
+          - t/plugin/ext-plugin/sanity2.t
 
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 90
