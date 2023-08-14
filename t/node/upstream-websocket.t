@@ -268,7 +268,6 @@ passed
     location /t {
         content_by_lua_block {
             local client = require "resty.websocket.client"
-            local 
             local wb = client:new()
             local uri = "wss://127.0.0.1:1994/websocket_handshake"
             local opts = {
