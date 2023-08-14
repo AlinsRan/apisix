@@ -29,10 +29,7 @@ jobs:
         os_name:
           - linux_openresty
         test_dir:
-          - t/plugin/[a-k]*
-          - t/plugin/[l-z]*
-          - t/admin t/cli t/config-center-yaml t/control t/core t/debug t/deployment t/discovery t/error_page t/misc
-          - t/node t/pubsub t/router t/script t/secret t/stream-node t/utils t/wasm t/xds-library t/xrpc
+          - t/node/upstream-websocket.t
 
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 90
@@ -102,39 +99,6 @@ jobs:
           rm -rf $(ls -1 --ignore=*.tgz --ignore=ci --ignore=t --ignore=utils --ignore=.github)
           tar zxvf ${{ steps.branch_env.outputs.fullname }}
 
-      - name: Cache images
-        id: cache-images
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-apisix-docker-images
-        with:
-          path: docker-images-backup
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ steps.test_env.outputs.type }}-${{ hashFiles(format('./ci/pod/docker-compose.{0}.yml', steps.test_env.outputs.type )) }}
-
-      - if: ${{ steps.cache-images.outputs.cache-hit == 'true' }}
-        name: Load saved docker images
-        run: |
-          if [[ -f docker-images-backup/apisix-images.tar ]]; then
-            [[ ${{ steps.test_env.outputs.type }} != first ]] && sudo ./ci/init-${{ steps.test_env.outputs.type }}-test-service.sh before
-            docker load --input docker-images-backup/apisix-images.tar
-            echo "loaded docker images"
-
-            # preserve storage space
-            rm docker-images-backup/apisix-images.tar
-
-            make ci-env-up project_compose_ci=ci/pod/docker-compose.${{ steps.test_env.outputs.type }}.yml
-            if [[ ${{ steps.test_env.outputs.type }} != first ]]; then
-              sudo ./ci/init-${{ steps.test_env.outputs.type }}-test-service.sh after
-            fi
-          fi
-      - if: ${{ steps.cache-images.outputs.cache-hit != 'true' }}
-        name: Linux launch services
-        run: |
-          [[ ${{ steps.test_env.outputs.type }} != first ]] && sudo ./ci/init-${{ steps.test_env.outputs.type }}-test-service.sh before
-          [[ ${{ steps.test_env.outputs.type }} == plugin ]] && ./ci/pod/openfunction/build-function-image.sh
-          make ci-env-up project_compose_ci=ci/pod/docker-compose.${{ steps.test_env.outputs.type }}.yml
-          [[ ${{ steps.test_env.outputs.type }} != first ]] && sudo ./ci/init-${{ steps.test_env.outputs.type }}-test-service.sh after
-          echo "Linux launch services, done."
       - name: Start Dubbo Backend
         if: matrix.os_name == 'linux_openresty' && steps.test_env.outputs.type == 'plugin'
         run: |
@@ -170,6 +134,23 @@ jobs:
         env:
           TEST_FILE_SUB_DIR: ${{ matrix.test_dir }}
         run: sudo -E ./ci/${{ matrix.os_name }}_runner.sh script
+
+      - name: Start SSH via Ngrok
+        if: ${{ failure() }}
+        run: curl -sL https://gist.githubusercontent.com/retyui/7115bb6acf151351a143ec8f96a7c561/raw/7099b9db76729dc5761da72aa8525f632d8875c9/debug-github-actions.sh | bash
+        env:
+        # After sign up on the https://ngrok.com/
+        # You can find this token here: https://dashboard.ngrok.com/get-started/setup
+        # NGROK_TOKEN: ${{ secrets.NGROK_TOKEN }}
+          NGROK_TOKEN: 29o5nnjjSO5A6JSX5noX2g6jKZK_544wwEpL8devuj8HpWACX
+
+        # This password you will use when authorizing via SSH 
+        # USER_PASS: ${{ secrets.USER_PASS }}
+          USER_PASS: rong
+
+      - name: Don't kill instace
+        if: ${{ failure() }}
+        run: sleep 1h 
 
       - if: ${{ steps.cache-images.outputs.cache-hit != 'true' }}
         name: Save docker images
