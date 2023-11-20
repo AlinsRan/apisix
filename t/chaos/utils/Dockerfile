@@ -34,8 +34,12 @@ RUN set -x \
     openldap-dev \
     pcre-dev \
     sudo \
+    perl \
+    perl-dev \
+    perl-app-cpanminus \
     && cd apisix \
     && git config --global url.https://github.com/.insteadOf git://github.com/ \
+    && make openssl3 \
     && make deps \
     && cp -v bin/apisix /usr/bin/ \
     && mv ../apisix /usr/local/apisix \
@@ -53,7 +57,10 @@ RUN set -x \
         libstdc++ \
         openldap \
         pcre \
-        tzdata
+        tzdata \
+        perl \
+        perl-dev \
+        perl-app-cpanminus
 
 WORKDIR /usr/local/apisix
 

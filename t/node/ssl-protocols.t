@@ -21,11 +21,11 @@ log_level('info');
 no_root_location();
 no_shuffle();
 
-my $openssl_bin = $ENV{OPENSSL111_BIN};
+my $openssl_bin = $ENV{OPENSSL_BIN};
 if (! -x $openssl_bin) {
-    $ENV{OPENSSL111_BIN} = '/usr/local/openresty/openssl111/bin/openssl';
-    if (! -x $ENV{OPENSSL111_BIN}) {
-        plan(skip_all => "openssl111 not installed");
+    $ENV{OPENSSL_BIN} = '/usr/local/bin/openssl';
+    if (! -x $ENV{OPENSSL_BIN}) {
+        plan(skip_all => "openssl not installed");
     }
 }
 
@@ -91,8 +91,15 @@ GET /t
 passed
 
 
+=== TEST 2: check openssl version
+--- exec
+$OPENSSL_BIN version
+--- response_body eval
+qr/3.1.3/
 
-=== TEST 2:  create ssl for test.com (unset ssl_protocols)
+
+
+=== TEST 3:  create ssl for test.com (unset ssl_protocols)
 --- config
     location /t {
         content_by_lua_block {
@@ -126,27 +133,19 @@ passed
 
 
 
-=== TEST 3: Successfully, access test.com with TLSv1.3
+=== TEST 4: Successfully, access test.com with TLSv1.3
 --- exec
-echo -n "Q"  | $OPENSSL111_BIN s_client -connect 127.0.0.1:1994 -servername test.com -tls1_3 2>&1 | cat
+echo -n "Q"  | $OPENSSL_BIN s_client -connect 127.0.0.1:1994 -servername test.com -tls1_3 2>&1 | cat
 --- response_body eval
 qr/Server certificate/
 
 
 
-=== TEST 4: Successfully, access test.com with TLSv1.2
+=== TEST 5: Successfully, access test.com with TLSv1.2
 --- exec
 curl -k -v --tls-max 1.2 --tlsv1.2 --resolve "test.com:1994:127.0.0.1" https://test.com:1994/hello 2>&1 | cat
 --- response_body eval
 qr/TLSv1\.2 \(IN\), TLS handshake, Server hello(?s).*hello world/
-
-
-
-=== TEST 5: Successfully, access test.com with TLSv1.1
---- exec
-echo -n "Q"  | $OPENSSL111_BIN s_client -connect 127.0.0.1:1994 -servername test.com -tls1_1 2>&1 | cat
---- response_body eval
-qr/Server certificate/
 
 
 
@@ -219,7 +218,7 @@ GET /t
 
 === TEST 8: Successfully, access test.com with TLSv1.3
 --- exec
-echo -n "Q"  | $OPENSSL111_BIN s_client -connect 127.0.0.1:1994 -servername test.com -tls1_3 2>&1 | cat
+echo -n "Q"  | $OPENSSL_BIN s_client -connect 127.0.0.1:1994 -servername test.com -tls1_3 2>&1 | cat
 --- response_body eval
 qr/Server certificate/
 
@@ -235,7 +234,7 @@ qr/TLSv1\.2 \(IN\), TLS handshake, Server hello(?s).*hello world/
 
 === TEST 10: Successfully, access test2.com with TLSv1.3
 --- exec
-echo -n "Q"  | $OPENSSL111_BIN s_client -connect 127.0.0.1:1994 -servername test2.com -tls1_3 2>&1 | cat
+echo -n "Q"  | $OPENSSL_BIN s_client -connect 127.0.0.1:1994 -servername test2.com -tls1_3 2>&1 | cat
 --- response_body eval
 qr/Server certificate/
 
@@ -283,16 +282,8 @@ passed
 
 
 
-=== TEST 13: Successfully, access test.com with TLSv1.1
+=== TEST 13: Failed, access test.com with TLSv1.3
 --- exec
-echo -n "Q"  | $OPENSSL111_BIN s_client -connect 127.0.0.1:1994 -servername test.com -tls1_1 2>&1 | cat
---- response_body eval
-qr/Server certificate/
-
-
-
-=== TEST 14: Failed, access test.com with TLSv1.3
---- exec
-echo -n "Q"  | $OPENSSL111_BIN s_client -connect 127.0.0.1:1994 -servername test.com -tls1_3 2>&1 | cat
+echo -n "Q"  | $OPENSSL_BIN s_client -connect 127.0.0.1:1994 -servername test.com -tls1_3 2>&1 | cat
 --- response_body eval
 qr/tlsv1 alert/

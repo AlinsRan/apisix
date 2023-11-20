@@ -21,11 +21,12 @@
 install_dependencies() {
     export_version_info
     export_or_prefix
-
+    #remove existing openssl
+    yum -y remove openssl openssl-devel
     # install build & runtime deps
     yum install -y wget tar gcc automake autoconf libtool make unzip \
-        git sudo openldap-devel which ca-certificates openssl-devel \
-        epel-release
+        git sudo openldap-devel openssl-devel which ca-certificates \
+        epel-release cpanminus
 
     # install newer curl
     yum makecache
@@ -38,16 +39,21 @@ install_dependencies() {
     source scl_source enable devtoolset-9
     set -eu
 
-    # install openresty to make apisix's rpm test work
+    # install apisix-runtime to make apisix's rpm test work
     yum install -y yum-utils && yum-config-manager --add-repo https://openresty.org/package/centos/openresty.repo
-    wget "https://raw.githubusercontent.com/api7/apisix-build-tools/apisix-runtime/${APISIX_RUNTIME}/build-apisix-runtime-debug-centos7.sh"
-    wget "https://raw.githubusercontent.com/api7/apisix-build-tools/apisix-runtime/${APISIX_RUNTIME}/build-apisix-runtime.sh"
+
+    #install openssl3
+    . ./utils/install-openssl.sh
+    ls /usr/local/openssl
+    wget "https://raw.githubusercontent.com/api7/apisix-build-tools/master/build-apisix-runtime-debug-centos7.sh"
+    wget "https://raw.githubusercontent.com/api7/apisix-build-tools/master/build-apisix-runtime.sh"
     chmod +x build-apisix-runtime-debug-centos7.sh
     chmod +x build-apisix-runtime.sh
     ./build-apisix-runtime-debug-centos7.sh
 
     # install luarocks
-    ./utils/linux-install-luarocks.sh
+    echo "THIS IS OPENSSL PREFIX $openssl_prefix"
+    . ./utils/linux-install-luarocks.sh
 
     # install etcdctl
     ./ci/linux-install-etcd-client.sh
@@ -62,14 +68,15 @@ install_dependencies() {
     # add go1.15 binary to the path
     mkdir build-cache
     # centos-7 ci runs on a docker container with the centos image on top of ubuntu host. Go is required inside the container.
-    cd build-cache/ && wget -q https://golang.org/dl/go1.17.linux-amd64.tar.gz && tar -xf go1.17.linux-amd64.tar.gz
+    pushd build-cache/
+    wget -q https://golang.org/dl/go1.17.linux-amd64.tar.gz && tar -xf go1.17.linux-amd64.tar.gz
     export PATH=$PATH:$(pwd)/go/bin
-    cd ..
+    popd
     # install and start grpc_server_example
-    cd t/grpc_server_example
+    pushd t/grpc_server_example
 
     CGO_ENABLED=0 go build
-    cd ../../
+    popd
 
     start_grpc_server_example
 
@@ -80,10 +87,10 @@ install_dependencies() {
     install_nodejs
 
     # grpc-web server && client
-    cd t/plugin/grpc-web
+    pushd t/plugin/grpc-web
     ./setup.sh
     # back to home directory
-    cd ../../../
+    popd
 
     # install dependencies
     git clone https://github.com/openresty/test-nginx.git test-nginx

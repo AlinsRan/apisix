@@ -61,8 +61,10 @@ jobs:
         sudo apt-get -y install software-properties-common
         sudo add-apt-repository -y "deb http://openresty.org/package/ubuntu $(lsb_release -sc) main"
         sudo apt-get update
-        sudo apt-get install -y git curl openresty-openssl111-dev unzip make gcc libldap2-dev
-        ./utils/linux-install-luarocks.sh
+        sudo apt-get install -y git openresty curl unzip make gcc libldap2-dev cpanminus
+        sudo chmod +x ./utils/install-openssl.sh
+        . ./utils/install-openssl.sh
+        . ./utils/linux-install-luarocks.sh
 
         make deps
         make init

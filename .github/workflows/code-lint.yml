@@ -21,9 +21,10 @@ jobs:
         . ./ci/common.sh
         export_or_prefix
         export OPENRESTY_VERSION=default
-
-        ./ci/linux-install-openresty.sh
-        ./utils/linux-install-luarocks.sh
+        sudo apt-get install --reinstall ca-certificates
+        . ./ci/linux-install-openresty.sh
+        echo "THIS IS OPENSSL PREFIX $openssl_prefix"
+        . ./utils/linux-install-luarocks.sh
         sudo luarocks install luacheck
 
     - name: Script

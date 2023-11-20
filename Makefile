@@ -40,7 +40,12 @@ ENV_DOCKER             ?= docker
 ENV_DOCKER_COMPOSE     ?= docker-compose --project-directory $(CURDIR) -p $(project_name) -f $(project_compose_ci)
 ENV_NGINX              ?= $(ENV_NGINX_EXEC) -p $(CURDIR) -c $(CURDIR)/conf/nginx.conf
 ENV_NGINX_EXEC         := $(shell command -v openresty 2>/dev/null || command -v nginx 2>/dev/null)
-ENV_OPENSSL_PREFIX     ?= $(addprefix $(ENV_NGINX_PREFIX), openssl)
+ENV_OPENSSL_PREFIX     ?= /usr/local/openssl
+ifeq ($(wildcard $(ENV_OPENSSL_PREFIX)/lib),)
+	OPENSSL_LIB_DIR := $(ENV_OPENSSL_PREFIX)/lib64 #When /lib doesn't exist
+else
+	OPENSSL_LIB_DIR := $(ENV_OPENSSL_PREFIX)/lib
+endif
 ENV_LUAROCKS           ?= luarocks
 ## These variables can be injected by luarocks
 ENV_INST_PREFIX        ?= /usr
@@ -57,13 +62,13 @@ ifdef ENV_LUAROCKS_SERVER
 endif
 
 # Execute only in the presence of ENV_NGINX_EXEC to avoid unexpected error output
-ifneq ($(ENV_NGINX_EXEC), )
-	ENV_NGINX_PREFIX := $(shell $(ENV_NGINX_EXEC) -V 2>&1 | grep -Eo 'prefix=(.*)/nginx\s+' | grep -Eo '/.*/')
-	# OpenResty 1.17.8 or higher version uses openssl111 as the openssl dirname.
-	ifeq ($(shell test -d $(addprefix $(ENV_NGINX_PREFIX), openssl111) && echo -n yes), yes)
-		ENV_OPENSSL_PREFIX := $(addprefix $(ENV_NGINX_PREFIX), openssl111)
-	endif
-endif
+# ifneq ($(ENV_NGINX_EXEC), )
+# 	ENV_NGINX_PREFIX := $(shell $(ENV_NGINX_EXEC) -V 2>&1 | grep -Eo 'prefix=(.*)/nginx\s+' | grep -Eo '/.*/')
+# 	# OpenResty 1.17.8 or higher version uses openssl111 as the openssl dirname.
+# 	ifeq ($(shell test -d $(addprefix $(ENV_NGINX_PREFIX), openssl111) && echo -n yes), yes)
+# 		ENV_OPENSSL_PREFIX := $(addprefix $(ENV_NGINX_PREFIX), openssl111)
+# 	endif
+# endif
 
 # ENV patch for darwin
 ifeq ($(ENV_OS_NAME), darwin)
@@ -154,10 +159,12 @@ help:
 ### deps : Installing dependencies
 .PHONY: deps
 deps: runtime
+	ls $(ENV_OPENSSL_PREFIX)
+	ls $(OPENSSL_LIB_DIR)
 	$(eval ENV_LUAROCKS_VER := $(shell $(ENV_LUAROCKS) --version | grep -E -o "luarocks [0-9]+."))
 	@if [ '$(ENV_LUAROCKS_VER)' = 'luarocks 3.' ]; then \
 		mkdir -p ~/.luarocks; \
-		$(ENV_LUAROCKS) config $(ENV_LUAROCKS_FLAG_LOCAL) variables.OPENSSL_LIBDIR $(addprefix $(ENV_OPENSSL_PREFIX), /lib); \
+		$(ENV_LUAROCKS) config $(ENV_LUAROCKS_FLAG_LOCAL) variables.OPENSSL_LIBDIR $(OPENSSL_LIB_DIR); \
 		$(ENV_LUAROCKS) config $(ENV_LUAROCKS_FLAG_LOCAL) variables.OPENSSL_INCDIR $(addprefix $(ENV_OPENSSL_PREFIX), /include); \
 		[ '$(ENV_OS_NAME)' == 'darwin' ] && $(ENV_LUAROCKS) config $(ENV_LUAROCKS_FLAG_LOCAL) variables.PCRE_INCDIR $(addprefix $(ENV_PCRE_PREFIX), /include); \
 		$(ENV_LUAROCKS) install rockspec/apisix-master-0.rockspec --tree deps --only-deps $(ENV_LUAROCKS_SERVER_OPT); \
@@ -166,6 +173,9 @@ deps: runtime
 		exit 1; \
 	fi
 
+openssl3:
+	chmod +x ./utils/install-openssl.sh
+	. ./utils/install-openssl.sh
 
 ### undeps : Uninstalling dependencies
 .PHONY: undeps

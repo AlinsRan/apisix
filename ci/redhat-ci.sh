@@ -17,6 +17,7 @@
 #
 
 . ./ci/common.sh
+
 install_dependencies() {
     export_version_info
     export_or_prefix
@@ -24,7 +25,7 @@ install_dependencies() {
     # install build & runtime deps
     yum install -y --disablerepo=* --enablerepo=ubi-8-appstream-rpms --enablerepo=ubi-8-baseos-rpms \
     wget tar gcc automake autoconf libtool make unzip git sudo openldap-devel hostname \
-    which ca-certificates openssl-devel
+    which ca-certificates openssl-devel cpanminus
 
     # install newer curl
     yum makecache
@@ -34,17 +35,20 @@ install_dependencies() {
     # install apisix-runtime to make apisix's rpm test work
     yum install -y yum-utils && yum-config-manager --add-repo https://openresty.org/package/centos/openresty.repo
     rpm --import https://repos.apiseven.com/KEYS
-    yum install -y openresty-openssl111 openresty-openssl111-devel pcre pcre pcre-devel xz
+    yum install -y pcre pcre pcre-devel xz
     yum -y install https://repos.apiseven.com/packages/centos/apache-apisix-repo-1.0-1.noarch.rpm
+    #install openssl3
+    . ./utils/install-openssl.sh
 
-    wget "https://raw.githubusercontent.com/api7/apisix-build-tools/apisix-runtime/${APISIX_RUNTIME}/build-apisix-runtime-debug-centos7.sh"
-    wget "https://raw.githubusercontent.com/api7/apisix-build-tools/apisix-runtime/${APISIX_RUNTIME}/build-apisix-runtime.sh"
-    chmod +x build-apisix-runtime.sh
+    wget "https://raw.githubusercontent.com/api7/apisix-build-tools/master/build-apisix-runtime-debug-centos7.sh"
+    wget "https://raw.githubusercontent.com/api7/apisix-build-tools/master/build-apisix-runtime.sh"
     chmod +x build-apisix-runtime-debug-centos7.sh
+    chmod +x build-apisix-runtime.sh
     ./build-apisix-runtime-debug-centos7.sh
 
     # install luarocks
-    ./utils/linux-install-luarocks.sh
+    echo "THIS IS OPENSSL PREFIX $openssl_prefix"
+    . ./utils/linux-install-luarocks.sh
 
     # install etcdctl
     ./ci/linux-install-etcd-client.sh

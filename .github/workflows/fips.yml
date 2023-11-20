@@ -69,13 +69,6 @@ jobs:
         run: |
           echo "openssl3_prefix=$HOME" >>$GITHUB_OUTPUT
 
-      - name: Toggle openssl compile
-        id: test_ssl_env
-        shell: bash
-        if: steps.cache-openssl.outputs.cache-hit != 'true'
-        run: |
-          echo "openssl3=yes" >>$GITHUB_OUTPUT
-
       - name: Extract test type
         shell: bash
         id: test_env
@@ -140,14 +133,12 @@ jobs:
 
       - name: Linux Install
         env:
-          COMPILE_OPENSSL3: ${{ steps.test_ssl_env.outputs.openssl3 }}
+          COMPILE_FIPS: yes
           OPENSSL3_PREFIX: ${{ steps.set_openssl_prefix.outputs.openssl3_prefix }}
-          USE_OPENSSL3: yes
         run: |
           sudo --preserve-env=OPENRESTY_VERSION \
-          --preserve-env=COMPILE_OPENSSL3 \
+          --preserve-env=COMPILE_FIPS \
           --preserve-env=OPENSSL3_PREFIX \
-          --preserve-env=USE_OPENSSL3 \
           ./ci/${{ matrix.os_name }}_runner.sh do_install
 
       - name: Linux Script

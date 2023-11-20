@@ -16,7 +16,9 @@
 #
 
 set -ex
-
+if [ -z "${openssl_prefix}" ]; then
+    openssl_prefix="/usr/local/openssl"
+fi
 export_version_info() {
     source ./.requirements
 }
@@ -24,14 +26,13 @@ export_version_info() {
 export_or_prefix() {
     export OPENRESTY_PREFIX="/usr/local/openresty"
     export APISIX_MAIN="https://raw.githubusercontent.com/apache/apisix/master/rockspec/apisix-master-0.rockspec"
-    export PATH=$OPENRESTY_PREFIX/nginx/sbin:$OPENRESTY_PREFIX/luajit/bin:$OPENRESTY_PREFIX/bin:$PATH
-    export OPENSSL111_BIN=$OPENRESTY_PREFIX/openssl111/bin/openssl
+    export OPENSSL_BIN=/usr/local/bin/openssl
+    export PATH=$OPENSSL_BIN:$OPENRESTY_PREFIX/nginx/sbin:$OPENRESTY_PREFIX/luajit/bin:$OPENRESTY_PREFIX/bin:$PATH
 }
 
 create_lua_deps() {
     echo "Create lua deps"
-
-    make deps
+    ENV_OPENSSL_PREFIX=$openssl_prefix make deps
     # maybe reopen this feature later
     # luarocks install luacov-coveralls --tree=deps --local > build.log 2>&1 || (cat build.log && exit 1)
     # for github action cache

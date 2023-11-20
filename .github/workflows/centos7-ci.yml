@@ -7,7 +7,7 @@ on:
       - 'docs/**'
       - '**/*.md'
   pull_request:
-    branches: [master, 'release/**']
+    branches: [master, 'release/**', "openssl3"]
     paths-ignore:
       - 'docs/**'
       - '**/*.md'
@@ -90,7 +90,7 @@ jobs:
         for dir in `ls|grep -v "^apisix-build-tools$"`;do cp -r $dir ./apisix-build-tools/apisix/;done
 
         cd apisix-build-tools
-        make package type=rpm app=apisix version=${VERSION} checkout=release/${VERSION} image_base=centos image_tag=7 local_code_path=./apisix
+        make package type=rpm app=apisix version=${VERSION} checkout=openssl3 image_base=centos image_tag=7 local_code_path=./apisix
         cd ..
         rm -rf $(ls -1 --ignore=apisix-build-tools --ignore=t --ignore=utils --ignore=ci --ignore=Makefile --ignore=rockspec)
 

@@ -88,3 +88,5 @@ pack-v*-linux.tgz*
 # release tar package
 *.tgz
 release/*
+*tar.gz.*
+openssl*
