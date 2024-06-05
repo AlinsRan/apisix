@@ -18,7 +18,7 @@
 --- Return APISIX current version.
 --
 -- @module core.version
-
+-- test6
 return {
     VERSION = "3.9.0"
 }
