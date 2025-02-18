@@ -52,6 +52,9 @@ jobs:
 
       - name: Check file permissions
         run: |
+          echo "system info:"
+          uname -a
+          
           echo "File permissions for conf/config.yaml:"
           ls -l conf/config.yaml
 
@@ -79,6 +82,12 @@ jobs:
 
           echo "all groups:"
           sudo cat /etc/group
+
+      - name: Check filesystem type with df
+        run: df -T
+
+      - name: Check mount points
+        run: mount
 
       - name: Linux launch common services
         run: |
