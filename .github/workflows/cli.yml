@@ -26,6 +26,7 @@ jobs:
       matrix:
         platform:
           - ubuntu-latest
+          - ubuntu-20.04
         job_name:
           - linux_apisix_current_luarocks
 
