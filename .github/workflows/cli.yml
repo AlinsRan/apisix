@@ -70,6 +70,10 @@ jobs:
           echo "AppArmor status:"
           sudo aa-status || echo "AppArmor not installed"
 
+          echo "SELinux status:"
+          sestatus || echo "SELinux not installed"
+          sudo setenforce 0 || echo "SELinux not installed"
+
       - name: Linux launch common services
         run: |
           project_compose_ci=ci/pod/docker-compose.common.yml make ci-env-up
@@ -84,3 +88,8 @@ jobs:
 
       - name: Linux Script
         run: sudo ./ci/${{ matrix.job_name }}_runner.sh script
+
+      - name: Run debugger
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 35
