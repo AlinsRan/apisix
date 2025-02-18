@@ -355,6 +355,8 @@ nginx_config:
 
 rm logs/error.log
 make init
+echo "I AM WAITING for 1 minute"
+sleep 60
 make run
 
 admin_key=$(yq '.deployment.admin.admin_key[0].key' conf/config.yaml | sed 's/"//g')
