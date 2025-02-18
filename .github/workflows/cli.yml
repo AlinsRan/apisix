@@ -74,6 +74,12 @@ jobs:
           sestatus || echo "SELinux not installed"
           sudo setenforce 0 || echo "SELinux not installed"
 
+          echo "all users:"
+          sudo cat /etc/passwd
+
+          echo "all groups:"
+          sudo cat /etc/group
+
       - name: Linux launch common services
         run: |
           project_compose_ci=ci/pod/docker-compose.common.yml make ci-env-up
