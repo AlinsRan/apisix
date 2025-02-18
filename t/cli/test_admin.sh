@@ -355,7 +355,6 @@ nginx_config:
 
 rm logs/error.log
 make init
-sudo chmod 0644 conf/config.yaml
 echo "I AM WAITING for 1 minute"
 sleep 60
 make run

@@ -49,6 +49,26 @@ jobs:
           path: deps
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ matrix.job_name }}-${{ hashFiles('apisix-master-0.rockspec') }}
 
+      - name: Check file permissions
+        run: |
+          echo "File permissions for conf/config.yaml:"
+          ls -l conf/config.yaml
+
+          echo "Parent directory permissions for conf:"
+          ls -ld conf
+
+          echo "ACL for conf/config.yaml:"
+          getfacl conf/config.yaml
+
+          echo "File system type:"
+          df -T .
+
+          echo "Current umask:"
+          umask
+
+          echo "AppArmor status:"
+          sudo aa-status || echo "AppArmor not installed"
+
       - name: Linux launch common services
         run: |
           project_compose_ci=ci/pod/docker-compose.common.yml make ci-env-up
