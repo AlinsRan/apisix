@@ -53,9 +53,6 @@ rerun_flaky_tests() {
         exit 1
     fi
 
-    find ./ -name client.lua
-    cp client.lua ./deps/share/lua/5.1/resty/dns/client.lua
-
     local tests
     local n_test
     tests="$(awk '/^t\/.*.t\s+\(.+ Failed: .+\)/{ print $1 }' "$1")"
