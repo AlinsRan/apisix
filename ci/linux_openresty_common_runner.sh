@@ -83,6 +83,9 @@ script() {
     export_or_prefix
     openresty -V
 
+    find ./ -name client.lua
+    cp client.lua ./deps/share/lua/5.1/resty/dns/client.lua
+
     make init
 
     set_coredns
