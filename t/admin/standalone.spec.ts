@@ -944,4 +944,37 @@ describe('Validate API - Standalone', () => {
       });
     });
   });
+
+  describe('Variable resolution', () => {
+    it('resolves ${{VAR}} references in config pushed via the Admin API', async () => {
+      mockDigest += 1;
+      const config = {
+        routes: [
+          {
+            id: 'r_var',
+            uri: '/r_var',
+            upstream: {
+              nodes: { '127.0.0.1:1980': 1 },
+              type: 'roundrobin',
+            },
+            // The proxy-rewrite uri uses a ${{VAR:=default}} reference. The
+            // gateway must resolve it to the default ("/hello"); if it were
+            // left literal, the upstream would receive "${{...}}" instead of
+            // "/hello" and would not return the hello body.
+            plugins: {
+              'proxy-rewrite': { uri: '${{STANDALONE_ENV_TEST:=/hello}}' },
+            },
+          },
+        ],
+      };
+      const putResp = await client.put(ENDPOINT, config, {
+        headers: { [HEADER_DIGEST]: mockDigest },
+      });
+      expect(putResp.status).toEqual(202);
+
+      const resp = await client.get('/r_var');
+      expect(resp.status).toEqual(200);
+      expect(resp.data).toEqual('hello world\n');
+    });
+  });
 });
