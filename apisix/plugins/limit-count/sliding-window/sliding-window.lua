@@ -181,7 +181,9 @@ function _M.incoming(self, key, cost)
     end
 
     if red_cli then
-        red_cli:set_keepalive(10000, 100)
+        local conf = self.conf or {}
+        red_cli:set_keepalive(conf.redis_keepalive_timeout or 10000,
+                              conf.redis_keepalive_pool or 100)
     end
 
     -- The below limit checking is only to cope with a racy behaviour where
@@ -234,7 +236,9 @@ function _M.commit(self, key, cost)
     end
 
     if red_cli then
-        red_cli:set_keepalive(10000, 100)
+        local conf = self.conf or {}
+        red_cli:set_keepalive(conf.redis_keepalive_timeout or 10000,
+                              conf.redis_keepalive_pool or 100)
     end
 
     local remaining = math_floor(self.limit - new_count)

@@ -170,7 +170,9 @@ passed
                                 "redis_role": "master",
                                 "window_type": "sliding",
                                 "sync_interval": 0.2,
-                                "redis_database": 1
+                                "redis_database": 1,
+                                "redis_keepalive_timeout": 5000,
+                                "redis_keepalive_pool": 8
                             }
                         },
                         "upstream": {

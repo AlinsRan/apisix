@@ -82,6 +82,7 @@ policy_to_additional_properties["redis-sentinel"] = {
         redis_connect_timeout = {type = "integer", minimum = 1, default = 1000},
         redis_read_timeout = {type = "integer", minimum = 1, default = 1000},
         redis_keepalive_timeout = {type = "integer", minimum = 1, default = 60000},
+        redis_keepalive_pool = {type = "integer", minimum = 1, default = 100},
         redis_database = {type = "integer", minimum = 0, default = 0},
         redis_username = {type = "string", minLength = 1},
         redis_password = {type = "string", minLength = 0},

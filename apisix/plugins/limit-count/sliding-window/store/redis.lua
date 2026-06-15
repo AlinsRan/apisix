@@ -33,7 +33,6 @@ local incr_script = core.string.compress_script([=[
 local incr_script_sha = to_hex(ngx.sha1_bin(incr_script))
 
 
--- TODO: keepalive or close
 function _M.incr(self, key, delta, expiry, red)
     --                                          nk  key1  argv1  argv2
     local new_value, err
@@ -54,7 +53,6 @@ function _M.incr(self, key, delta, expiry, red)
 end
 
 
--- TODO: keepalive or close
 function _M.get(self, key, red)
     local value, err = red:get(key)
     if not value or value == ngx_null then

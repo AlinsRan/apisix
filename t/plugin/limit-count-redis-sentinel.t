@@ -622,3 +622,58 @@ db 1 keys: 1
 db 1 counter: 2
 db 2 keys: 1
 db 2 counter: 2
+
+
+
+=== TEST 16: set route with custom redis keepalive params
+--- config
+    location /t {
+        content_by_lua_block {
+            local t = require("lib.test_admin").test
+            local code, body = t('/apisix/admin/routes/1',
+                ngx.HTTP_PUT,
+                [[{
+                    "uri": "/hello",
+                    "plugins": {
+                        "limit-count": {
+                            "count": 2,
+                            "time_window": 2,
+                            "rejected_code": 503,
+                            "key": "remote_addr",
+                            "policy": "redis-sentinel",
+                            "redis_sentinels": [
+                                {"host": "127.0.0.1", "port": 26379}
+                            ],
+                            "redis_username": "master",
+                            "redis_password": "master-password",
+                            "redis_master_name": "mymaster",
+                            "redis_role": "master",
+                            "redis_keepalive_timeout": 5000,
+                            "redis_keepalive_pool": 8
+                        }
+                    },
+                    "upstream": {
+                        "nodes": {
+                            "127.0.0.1:1980": 1
+                        },
+                        "type": "roundrobin"
+                    }
+                }]]
+                )
+
+            if code >= 300 then
+                ngx.status = code
+            end
+            ngx.say(body)
+        }
+    }
+--- response_body
+passed
+
+
+
+=== TEST 17: up the limit with custom keepalive params
+--- pipelined_requests eval
+["GET /hello", "GET /hello", "GET /hello", "GET /hello"]
+--- error_code eval
+[200, 200, 503, 503]
