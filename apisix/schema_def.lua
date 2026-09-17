@@ -414,7 +414,7 @@ local private_key_schema = {
 }
 
 
-local warm_up_conf_schema = {
+local slow_start_schema = {
     description = "slow start: ramp a newly observed node up to its configured weight",
     type = "object",
     properties = {
@@ -453,7 +453,7 @@ local warm_up_conf_schema = {
     required = {"slow_start_time_seconds", "min_weight_percent"},
     additionalProperties = false,
 }
-_M.warm_up_conf = warm_up_conf_schema
+_M.slow_start = slow_start_schema
 
 
 local upstream_schema = {
@@ -469,7 +469,7 @@ local upstream_schema = {
 
         -- properties
         nodes = nodes_schema,
-        warm_up_conf = warm_up_conf_schema,
+        slow_start = slow_start_schema,
         retries = {
             type = "integer",
             minimum = 0,

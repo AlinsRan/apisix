@@ -14,7 +14,7 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 --
--- Slow start (`upstream.warm_up_conf`): a node that the data plane observes for
+-- Slow start (`upstream.slow_start`): a node that the data plane observes for
 -- the first time takes a reduced share of the traffic and ramps back to its
 -- configured weight over `slow_start_time_seconds`.
 --
@@ -294,7 +294,7 @@ local function reconcile(conf, present_nodes, nodes, scope, now)
     local known = decode_snapshot(shdict:get(snapshot_key))
 
     -- The first reconcile of a scope is a baseline: the nodes an upstream is
-    -- bootstrapped with, and the nodes it already had when `warm_up_conf` was
+    -- bootstrapped with, and the nodes it already had when `slow_start` was
     -- turned on, are mature. So are nodes observed inside the startup grace
     -- period, which absorbs the ordering differences of a cold restart.
     local baseline = (known == nil) or within_startup_grace(conf, now)
@@ -434,21 +434,21 @@ local function usable(up_conf, nodes)
     local scope = scope_key(up_conf)
     if not scope then
         core.log.error("slow start needs an upstream with a resource key, ",
-                       "ignoring warm_up_conf")
+                       "ignoring slow_start")
         return nil
     end
 
     if not shdict then
         -- slow start only ramps HTTP upstreams, and the stream subsystem has no
         -- such shared dict. Like every other upstream field that does not apply
-        -- there, `warm_up_conf` is quietly ignored and the configured weights are
+        -- there, `slow_start` is quietly ignored and the configured weights are
         -- used, rather than failing the connection or logging on every build
         return nil
     end
 
     if up_conf.type ~= "roundrobin" then
         report_once(scope, "slow start only supports roundrobin, ignoring ",
-                    "warm_up_conf of upstream ", scope)
+                    "slow_start of upstream ", scope)
         return nil
     end
 
@@ -457,7 +457,7 @@ local function usable(up_conf, nodes)
         for _, node in ipairs(nodes) do
             if node.priority ~= priority then
                 report_once(scope, "slow start does not support an upstream with ",
-                            "mixed node priorities, ignoring warm_up_conf of upstream ",
+                            "mixed node priorities, ignoring slow_start of upstream ",
                             scope)
                 return nil
             end
@@ -472,7 +472,7 @@ end
 -- nil when the upstream does not use slow start. Runs once per picker build, not
 -- per request.
 function _M.effective_weights(up_conf, nodes)
-    local conf = up_conf.warm_up_conf
+    local conf = up_conf.slow_start
     if type(conf) ~= "table" then
         return nil
     end
@@ -510,7 +510,7 @@ end
 -- but on an upstream that sees only a handful of requests per `interval` the
 -- ramping node can end up with even less traffic than its weight asks for.
 function _M.version_suffix(up_conf)
-    local conf = up_conf.warm_up_conf
+    local conf = up_conf.slow_start
     if type(conf) ~= "table" or not shdict or not up_conf.resource_key
        or up_conf.type ~= "roundrobin" then
         return nil

@@ -154,7 +154,7 @@ true
                         "type": "roundrobin",
                         "desc": "]] .. desc .. [[",
                         "nodes": ]] .. nodes .. [[,
-                        "warm_up_conf": {
+                        "slow_start": {
                             "slow_start_time_seconds": 10,
                             "min_weight_percent": 1,
                             "interval": 1
@@ -285,7 +285,7 @@ slow start finished for node 127.0.0.1:1981
                     [[{
                         "type": "roundrobin",
                         "nodes": ]] .. nodes .. [[,
-                        "warm_up_conf": {
+                        "slow_start": {
                             "slow_start_time_seconds": 10,
                             "min_weight_percent": 1,
                             "interval": 10
@@ -377,7 +377,7 @@ slow start began for node 127.0.0.1:1981
 
 
 
-=== TEST 6: without warm_up_conf the weights are used as configured
+=== TEST 6: without slow_start the weights are used as configured
 --- config
     location /t {
         content_by_lua_block {
@@ -464,7 +464,7 @@ slow start began for node
                         "upstream": {
                             "type": "roundrobin",
                             "nodes": ]] .. nodes .. [[,
-                            "warm_up_conf": {
+                            "slow_start": {
                                 "slow_start_time_seconds": 10,
                                 "min_weight_percent": 1,
                                 "interval": 1
@@ -533,7 +533,7 @@ qr{of upstream \S*/routes/4}
             local up_conf = {
                 resource_key = "/upstreams/version-suffix",
                 type = "roundrobin",
-                warm_up_conf = {
+                slow_start = {
                     slow_start_time_seconds = 10,
                     min_weight_percent = 1,
                     interval = 2,
@@ -608,7 +608,7 @@ still settled: #wm
                             "unhealthy": {"interval": 1, "tcp_failures": 1}
                         }
                     },
-                    "warm_up_conf": {
+                    "slow_start": {
                         "slow_start_time_seconds": 10,
                         "min_weight_percent": 1,
                         "interval": 1
@@ -694,7 +694,7 @@ left the upstream
             local up_conf = {
                 resource_key = "/upstreams/pending",
                 type = "roundrobin",
-                warm_up_conf = {
+                slow_start = {
                     slow_start_time_seconds = 100,
                     min_weight_percent = 1,
                     interval = 1,
@@ -769,7 +769,7 @@ slow start began for node 10.0.0.2:8080
             local n2 = {host = "10.0.1.2", port = 80, weight = 100, priority = 0}
             local scope = "/upstreams/race"
             local key = scope .. "|10.0.1.2:80"
-            local up_conf = {resource_key = scope, type = "roundrobin", warm_up_conf = conf}
+            local up_conf = {resource_key = scope, type = "roundrobin", slow_start = conf}
 
             up_conf.nodes = {n1}
             slow_start.effective_weights(up_conf, {n1})
