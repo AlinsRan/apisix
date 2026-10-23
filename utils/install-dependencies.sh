@@ -59,6 +59,27 @@ function install_dependencies_with_yum() {
         openresty-zlib-devel openresty-pcre-devel libxml2-devel libxslt-devel zlib-devel
 }
 
+# jsonschema still depends on lrexlib-pcre, which requires PCRE1.
+function install_pcre() (
+    if LC_ALL=C apt-cache policy libpcre3-dev | grep -qE "Candidate: [0-9]"; then
+        sudo apt-get install -y libpcre3-dev
+        exit
+    fi
+
+    # Ubuntu 26.04 no longer packages PCRE1.
+    workdir=$(mktemp -d)
+    trap 'rm -rf "$workdir"' EXIT
+    cd "$workdir"
+    wget -q https://downloads.sourceforge.net/project/pcre/pcre/8.45/pcre-8.45.tar.gz
+    echo "4e6ce03e0336e8b4a3d6c2b70b1c5e18590a5673a98186da90d4f33c23defc09  pcre-8.45.tar.gz" | sha256sum -c -
+    tar -xzf pcre-8.45.tar.gz
+    cd pcre-8.45
+    ./configure --prefix=/usr/local --enable-utf --enable-unicode-properties --enable-jit
+    make -j"$(nproc)"
+    sudo make install
+    sudo ldconfig
+)
+
 # Install dependencies on ubuntu and debian
 function install_dependencies_with_apt() {
     # Build the runtime with distribution PCRE2 and zlib. This also works on
@@ -66,6 +87,7 @@ function install_dependencies_with_apt() {
     sudo apt-get update
     sudo apt-get install -y ca-certificates wget patch curl make gcc g++ cpanminus \
         libpcre2-dev libyaml-dev unzip xz-utils libxml2-dev libxslt-dev zlib1g-dev
+    install_pcre
 }
 
 # Identify the different distributions and call the corresponding function
@@ -141,6 +163,9 @@ function main() {
 
     case_opt=$1
     case "${case_opt}" in
+        "install_pcre")
+            install_pcre
+        ;;
         "install_luarocks")
             install_luarocks
         ;;
