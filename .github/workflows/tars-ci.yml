@@ -1,6 +1,7 @@
 name: CI Tars
 
 on:
+  workflow_dispatch:
   push:
     branches: [ master, 'release/**' ]
     paths-ignore:

@@ -1,6 +1,7 @@
 name: Code Lint
 
 on:
+  workflow_dispatch:
   pull_request:
     branches: [master, 'release/**']
     paths-ignore:
